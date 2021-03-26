@@ -3,59 +3,69 @@ using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT.Interactive;
+using EFT.Trainer.Configuration;
 using EFT.Trainer.Extensions;
-using EFT.Trainer.UI;
 using UnityEngine;
 
 namespace EFT.Trainer.Features
 {
-	public class ExfiltrationPoints : CachableMonoBehaviour<IEnumerable<ExfiltrationPointRecord>>
+	public class ExfiltrationPoints : PointOfInterests
 	{
-		public static readonly Color EligibleExfiltrationPointColor = Color.green;
-		public static readonly Color ExfiltrationPointColor = Color.yellow;
+		[ConfigurationProperty]
+		public Color EligibleColor { get; set; } = Color.green;
+		
+		[ConfigurationProperty]
+		public Color NotEligibleColor { get; set; } = Color.yellow;
 
-		public override float CacheTimeInSec => 10f;
-		public override bool Enabled { get; set; } = true;
+		public override float CacheTimeInSec { get; set; } = 7f;
 
-		public override IEnumerable<ExfiltrationPointRecord> RefreshData()
+		public static PointOfInterest[] Empty => Array.Empty<PointOfInterest>();
+
+		public override PointOfInterest[] RefreshData()
 		{
 			var world = Singleton<GameWorld>.Instance;
 			if (world == null)
-				yield break;
+				return Empty;
 
 			if (world.ExfiltrationController == null)
-				yield break;
+				return Empty;
 
 			var player = GameState.Current?.LocalPlayer;
 			if (!player.IsValid())
-				yield break;
+				return Empty;
 
 			var profile = player!.Profile;
 			var info = profile?.Info;
 			if (info == null)
-				yield break;
+				return Empty;
 
 			var side = info.Side;
 			var points = GetExfiltrationPoints(side, world);
 			if (points == null)
-				yield break;
+				return Empty;
+
+			var camera = Camera.main;
+			if (camera == null)
+				return Empty;
 
 			var eligiblePoints = GetEligibleExfiltrationPoints(side, world, profile);
-			var camera = Camera.main;
+			var records = new List<PointOfInterest>();
 			foreach (var point in points)
 			{
 				if (!point.IsValid()) 
 					continue;
 
 				var position = point.transform.position;
-				yield return new ExfiltrationPointRecord
+				records.Add(new PointOfInterest
 				{
 					Name = point.Settings.Name.Localized(),
 					Position = position,
 					ScreenPosition = camera.WorldPointToScreenPoint(position),
-					Color = eligiblePoints.Contains(point) ? EligibleExfiltrationPointColor : ExfiltrationPointColor
-				};
+					Color = eligiblePoints.Contains(point) ? EligibleColor : NotEligibleColor
+				});
 			}
+
+			return records.ToArray();
 		}
 
 		private static ExfiltrationPoint[] GetExfiltrationPoints(EPlayerSide side, GameWorld world)
@@ -83,31 +93,5 @@ namespace EFT.Trainer.Features
 
 			return result.ToArray();
 		}
-
-		public override void ProcessDataOnGUI(IEnumerable<ExfiltrationPointRecord> data)
-		{
-			var camera = Camera.main;
-
-			foreach (var point in data)
-			{
-				var position = point.Position;
-
-				var screenPosition = camera.WorldPointToScreenPoint(position);
-				if (!camera.IsScreenPointVisible(screenPosition))
-					continue;
-
-				var distance = Math.Round(Vector3.Distance(camera.transform.position, position));
-				var caption = $"{point.Name} [{distance}m]";
-				Render.DrawString(new Vector2(screenPosition.x - 50f, screenPosition.y), caption, point.Color);
-			}
-		}
-	}
-
-	public struct ExfiltrationPointRecord
-	{
-		public string Name { get; set; }
-		public Vector3 Position { get; set; }
-		public Vector3 ScreenPosition { get; set; }
-		public Color Color { get; set; }
 	}
 }

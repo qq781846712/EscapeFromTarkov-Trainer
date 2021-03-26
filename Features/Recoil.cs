@@ -1,17 +1,15 @@
-﻿using EFT.Trainer.Extensions;
-using UnityEngine;
+﻿using EFT.Trainer.Configuration;
+using EFT.Trainer.Extensions;
 
 namespace EFT.Trainer.Features
 {
-	public class Recoil : MonoBehaviour, IEnableable
+	public class Recoil : FeatureMonoBehaviour
 	{
-		public bool Enabled { get; set; } = false;
+		[ConfigurationProperty]
+		public override bool Enabled { get; set; } = false;
 
-		public void Update()
+		protected override void UpdateFeature()
 		{
-			if (!Enabled)
-				return;
-
 			var player = GameState.Current?.LocalPlayer;
 			if (!player.IsValid())
 				return;

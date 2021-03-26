@@ -8,18 +8,28 @@ This is an attempt -for educational purposes only- to alter a Unity game at runt
 ## Features
 
 This trainer gives:
-- HUD (ammo left in chamber / magazine, fire mode)
-- Door unlocker (use keypad period)
-- Wallhack (you'll see players / bots / bosses with distinct colors through walls)
-- Exfiltration points (green for available points, yellow for others)
-- No recoil (off by default)
+- HUD (ammo left in chamber / magazine, fire mode).
+- Door unlocker (use keypad period).
+- Wallhack (you'll see players / bots / bosses with distinct colors through walls).
+- Exfiltration points (green for available points, yellow for others).
+- No recoil (off by default).
+- Locations for taking/placing quest items (off by default). Only items related to your started quests are displayed.
+- Hidden stashes like buried barrels or ground caches (off by default).
+- Ability to list all lootable items and to track any item by name (even in containers).
+- Load/Save all settings.
 
-![demo](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/demo.png)
-![demo](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/demo2.png)
+![Wallhack](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/demo.png)
+![Exfils](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/demo2.png)
+![Colors](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/demo3.png)
+![Quests](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/quests.png)
+![Stashes](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/stashes.png)
+![Track](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/track.png)
+![Lootitems](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/lootitems.png)
+![ItemInContainers](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/itemcontainers.png)
 
 ## Installation
 
-You can try to compile the code yourself (you will need a recent Visual Studio, because we are using CSharp 9). you can use a precompiled release as well.
+You can try to compile the code yourself (you will need a recent Visual Studio, because we are using CSharp 9). You can use a precompiled release as well.
 
 Copy all files in your EFT directory like `C:\Battlestate Games\EFT`:
 
@@ -39,16 +49,73 @@ Overwrite the existing `EscapeFromTarkov_Data\Managed\NLog.dll.nlog` using `NLog
 
 ![console](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/console.png)
 
-This trainer hooks into command system, so you can easily setup features using the built-in console:
+This trainer hooks into the command system, so you can easily setup features using the built-in console:
 
-| Command  | Values        | Default | Description                      | 
-|----------|---------------|---------|----------------------------------|
-| dump     |               |         | Dump game state for analysis     |
-| exfil    | `on` or `off` | `on`    | Show/hide exfiltration points    |
-| hud      | `on` or `off` | `on`    | Show/hide hud.                   |
-| norecoil | `on` or `off` | `off`   | Disable/Enable recoil            |
-| status   |               |         | Show status of all features      |
-| wallhack | `on` or `off` | `on`    | Show/hide players (on next raid) |
+| Command  | Values              | Default | Description                      | 
+|----------|---------------------|---------|----------------------------------|
+| dump     |                     |         | Dump game state for analysis     |
+| exfil    | `on` or `off`       | `on`    | Show/hide exfiltration points    |
+| hud      | `on` or `off`       | `on`    | Show/hide hud.                   |
+| list     | `<optional filter>` |         | List lootable items              |
+| load     |                     |         | Load settings from `trainer.ini` |
+| loot     | `on` or `off`       |         | Show/hide tracked items          |
+| norecoil | `on` or `off`       | `off`   | Disable/Enable recoil            |
+| quest    | `on` or `off`       | `off`   | Show/hide quest POI              |
+| save     |                     |         | Save settings to `trainer.ini`   |
+| stash    | `on` or `off`       | `off`   | Show/hide stashes                |
+| status   |                     |         | Show status of all features      |
+| track    | `[name]`            |         | Track all items matching `name`  |
+| untrack  | `[name]` or `*`     |         | Untrack a `name` or `*` for all  |
+| wallhack | `on` or `off`       | `on`    | Show/hide players (on next raid) |
+
+## Sample `trainer.ini` configuration file
+
+```ini
+; Be careful when updating this file :)
+; For keys, use https://docs.unity3d.com/ScriptReference/KeyCode.html
+; Colors are stored as an array of 'RGBA' floats
+
+EFT.Trainer.Features.Doors.Key="KeypadPeriod"
+
+EFT.Trainer.Features.ExfiltrationPoints.CacheTimeInSec=7.0
+EFT.Trainer.Features.ExfiltrationPoints.EligibleColor=[0.0,1.0,0.0,1.0]
+EFT.Trainer.Features.ExfiltrationPoints.Enabled=true
+EFT.Trainer.Features.ExfiltrationPoints.Key="F1"
+EFT.Trainer.Features.ExfiltrationPoints.NotEligibleColor=[1.0,0.921568632,0.0156862754,1.0]
+
+EFT.Trainer.Features.GameState.CacheTimeInSec=2.0
+
+EFT.Trainer.Features.Hud.Color=[1.0,1.0,1.0,1.0]
+EFT.Trainer.Features.Hud.Enabled=true
+EFT.Trainer.Features.Hud.Key="F2"
+
+EFT.Trainer.Features.LootableContainers.CacheTimeInSec=11.0
+EFT.Trainer.Features.LootableContainers.Color=[1.0,1.0,1.0,1.0]
+EFT.Trainer.Features.LootableContainers.Enabled=false
+EFT.Trainer.Features.LootableContainers.Key="F3"
+
+EFT.Trainer.Features.LootItems.CacheTimeInSec=3.0
+EFT.Trainer.Features.LootItems.Color=[0.0,1.0,1.0,1.0]
+EFT.Trainer.Features.LootItems.Enabled=true
+EFT.Trainer.Features.LootItems.Key="F4"
+EFT.Trainer.Features.LootItems.SearchInsideContainers=true
+EFT.Trainer.Features.LootItems.TrackedNames=["6L31","analyzer","graphic","ushanka","cowboy","respirator","gphone","controller","fiber","wires","vpx","rfid","rechar"]
+
+EFT.Trainer.Features.Players.BearColor=[0.0,0.0,1.0,1.0]
+EFT.Trainer.Features.Players.BossColor=[1.0,0.0,0.0,1.0]
+EFT.Trainer.Features.Players.Enabled=true
+EFT.Trainer.Features.Players.Key="F5"
+EFT.Trainer.Features.Players.ScavColor=[1.0,0.921568632,0.0156862754,1.0]
+EFT.Trainer.Features.Players.UsecColor=[0.0,1.0,0.0,1.0]
+
+EFT.Trainer.Features.Quests.CacheTimeInSec=5.0
+EFT.Trainer.Features.Quests.Color=[1.0,0.0,1.0,1.0]
+EFT.Trainer.Features.Quests.Enabled=true
+EFT.Trainer.Features.Quests.Key="F6"
+
+EFT.Trainer.Features.Recoil.Enabled=false
+EFT.Trainer.Features.Recoil.Key="F7"
+```
 
 ## Mono injection
 
