@@ -4,20 +4,22 @@ using EFT.Trainer.Extensions;
 using EFT.Trainer.UI;
 using UnityEngine;
 
+#nullable enable
+
 namespace EFT.Trainer.Features
 {
-	public class Hud : FeatureMonoBehaviour
+	public class Hud : ToggleMonoBehaviour
 	{
 		[ConfigurationProperty]
 		public Color Color { get; set; } = Color.white;
 
-		protected override void OnGUIFeature()
+		protected override void OnGUIWhenEnabled()
 		{
 			var player = GameState.Current?.LocalPlayer;
 			if (!player.IsValid())
 				return;
 
-			if (player!.HandsController == null || player.HandsController.Item is not Weapon weapon)
+			if (player.HandsController == null || player.HandsController.Item is not Weapon weapon)
 				return;
 
 			var mag = weapon.GetCurrentMagazine();

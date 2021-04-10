@@ -1,22 +1,16 @@
 ﻿using EFT.Interactive;
-using EFT.Trainer.Configuration;
 using EFT.Trainer.Extensions;
 using UnityEngine;
 
+#nullable enable
+
 namespace EFT.Trainer.Features
 {
-	public class Doors : MonoBehaviour
+	public class Doors : TriggerMonoBehaviour
 	{
-		[ConfigurationProperty]
-		public KeyCode Key { get; set; } = KeyCode.KeypadPeriod;
+		public override KeyCode Key { get; set; } = KeyCode.KeypadPeriod;
 
-		private void Update()
-		{
-			if (Input.GetKey(Key))
-				UnlockNearbyDoors();
-		}
-
-		private static void UnlockNearbyDoors()
+		protected override void UpdateWhenTriggered()
 		{
 			var player = GameState.Current?.LocalPlayer;
 			if (!player.IsValid())
@@ -31,7 +25,7 @@ namespace EFT.Trainer.Features
 				if (door.DoorState != EDoorState.Locked)
 					continue;
 
-				var offset = player!.Transform.position - door.transform.position;
+				var offset = player.Transform.position - door.transform.position;
 				var sqrLen = offset.sqrMagnitude;
 
 				// only unlock if near me, else you'll get a ban from BattlEye if you brute-force-unlock all doors

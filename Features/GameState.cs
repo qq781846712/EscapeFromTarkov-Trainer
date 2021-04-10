@@ -1,14 +1,18 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using Comfort.Common;
 using EFT.Trainer.Configuration;
 using EFT.Trainer.Extensions;
 using UnityEngine;
 
+#nullable enable
+
 namespace EFT.Trainer.Features
 {
 	public class GameState : CachableMonoBehaviour<GameStateSnapshot>
 	{
-		public static GameStateSnapshot Current { get; private set; }
+		public static GameStateSnapshot? Current { get; private set; }
 
 		public override float CacheTimeInSec { get; set; } = 2f;
 
@@ -18,7 +22,15 @@ namespace EFT.Trainer.Features
 		[ConfigurationProperty(Skip = true)] // we do not want to offer save/load support for this
 		public override KeyCode Key { get; set; } = KeyCode.None;
 
-		public override GameStateSnapshot RefreshData()
+		public static Shader OutlineShader { get; private set; }
+
+		private void Awake()
+		{
+			var bundle = AssetBundle.LoadFromFile(Path.Combine(Application.dataPath, "outline"));
+			OutlineShader = bundle.LoadAsset<Shader>("assets/outline.shader");
+		}
+
+		public override GameStateSnapshot? RefreshData()
 		{
 			var snapshot = new GameStateSnapshot();
 			var world = Singleton<GameWorld>.Instance;
@@ -35,7 +47,7 @@ namespace EFT.Trainer.Features
 
 			foreach (var player in players)
 			{
-				if (player.IsYourPlayer())
+				if (player.IsYourPlayer)
 				{
 					snapshot.LocalPlayer = player;
 					continue;
@@ -47,6 +59,8 @@ namespace EFT.Trainer.Features
 				hostiles.Add(player);
 			}
 
+			snapshot.Camera = Camera.main;
+
 			Current = snapshot;
 			return snapshot;
 		}
@@ -54,7 +68,8 @@ namespace EFT.Trainer.Features
 
 	public class GameStateSnapshot
 	{
-		public Player LocalPlayer { get; set; }
-		public IEnumerable<Player> Hostiles { get; set; }
+		public Camera? Camera { get; set; }
+		public Player? LocalPlayer { get; set; }
+		public IEnumerable<Player> Hostiles { get; set; } = Array.Empty<Player>();
 	}
 }

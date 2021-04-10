@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+#nullable enable
+
 namespace EFT.Trainer.UI
 {
     public static class Render
@@ -25,5 +27,12 @@ namespace EFT.Trainer.UI
             var upperLeft = centered ? position - size / 2f : position;
             GUI.Label(new Rect(upperLeft, size), content);
         }
-    }
+
+        public static void DrawCrosshair(Vector2 position, float size, Color color, float thickness)
+        {
+	        Color = color;
+	        GUI.DrawTexture(new Rect(position.x - size, position.y, size * 2 + thickness, thickness), Texture2D.whiteTexture);
+	        GUI.DrawTexture(new Rect(position.x, position.y - size, thickness, size * 2 + thickness), Texture2D.whiteTexture);
+        }
+	}
 }

@@ -13,6 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
     <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -54,6 +55,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Battlestate Games\sptarkov\EscapeFromTarkov_Data\Managed\Comfort.Unity.dll</HintPath>
     </Reference>
+    <Reference Include="ItemComponent.Types">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>C:\Battlestate Games\sptarkov\EscapeFromTarkov_Data\Managed\ItemComponent.Types.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>C:\Battlestate Games\sptarkov\EscapeFromTarkov_Data\Managed\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -86,12 +91,26 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Configuration\ColorConverter.cs" />
     <Compile Include="Configuration\ConfigurationManager.cs" />
     <Compile Include="Configuration\ConfigurationPropertyAttribute.cs" />
+    <Compile Include="Configuration\KeyCodeConverter.cs" />
+    <Compile Include="Extensions\ELootRarityExtensions.cs" />
     <Compile Include="Extensions\ExfiltrationPointExtension.cs" />
     <Compile Include="Extensions\DoorExtensions.cs" />
     <Compile Include="Extensions\ItemExtension.cs" />
-    <Compile Include="Features\FeatureMonoBehaviour.cs" />
+    <Compile Include="Extensions\NotNullWhenAttribute.cs" />
+    <Compile Include="Extensions\StringExtensions.cs" />
+    <Compile Include="Extensions\ThrowableExtensions.cs" />
+    <Compile Include="Features\CrossHair.cs" />
+    <Compile Include="Features\Grenades.cs" />
+    <Compile Include="Features\ThermalVision.cs" />
+    <Compile Include="Features\NightVision.cs" />
+    <Compile Include="Features\AutomaticGun.cs" />
+    <Compile Include="Features\ToggleMonoBehaviour.cs" />
+    <Compile Include="Features\NoRecoil.cs" />
+    <Compile Include="Features\Stamina.cs" />
+    <Compile Include="Features\TriggerMonoBehaviour.cs" />
     <Compile Include="KnownTemplateIds.cs" />
     <Compile Include="Extensions\LootableContainerExtension.cs" />
     <Compile Include="Extensions\LootItemExtension.cs" />
@@ -109,7 +128,6 @@
     <Compile Include="Features\Hud.cs" />
     <Compile Include="Features\ExfiltrationPoints.cs" />
     <Compile Include="Features\Players.cs" />
-    <Compile Include="Features\Recoil.cs" />
     <Compile Include="Features\SceneDumper.cs" />
     <Compile Include="Loader.cs" />
     <Compile Include="Features\GameState.cs" />

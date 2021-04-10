@@ -7,6 +7,8 @@ using EFT.Trainer.Configuration;
 using EFT.Trainer.Extensions;
 using UnityEngine;
 
+#nullable enable
+
 namespace EFT.Trainer.Features
 {
 	public class LootItems : PointOfInterests
@@ -22,32 +24,27 @@ namespace EFT.Trainer.Features
 		[ConfigurationProperty] 
 		public bool SearchInsideContainers { get; set; } = true;
 
-		public void Track(string lootname)
+		public bool Track(string lootname)
 		{
 			if (!TrackedNames.Contains(lootname))
+			{
 				TrackedNames.Add(lootname);
+				return true;
+			}
 
-			DumpList();
+			return false;
 		}
 
-		public void UnTrack(string lootname)
+		public bool UnTrack(string lootname)
 		{
-			if (lootname == "*")
+			if (lootname == "*" && TrackedNames.Count > 0)
+			{
 				TrackedNames.Clear();
-			else
-				TrackedNames.Remove(lootname);
-
-			DumpList();
+				return true;
+			}
+			
+			return TrackedNames.Remove(lootname);
 		}
-
-		private void DumpList()
-		{
-			AddConsoleLog("Tracking list updated...", "tracker");
-			foreach (var item in TrackedNames)
-				AddConsoleLog($"Tracking: {item}", "tracker");
-		}
-
-		public static PointOfInterest[] Empty => Array.Empty<PointOfInterest>();
 
 		public override PointOfInterest[] RefreshData()
 		{
@@ -62,7 +59,7 @@ namespace EFT.Trainer.Features
 			if (!player.IsValid())
 				return Empty;
 
-			var camera = Camera.main;
+			var camera = GameState.Current?.Camera;
 			if (camera == null)
 				return Empty;
 

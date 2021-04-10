@@ -1,11 +1,12 @@
-﻿using System.IO;
-using EFT.Trainer.Configuration;
+﻿using EFT.Trainer.Configuration;
 using EFT.Trainer.Extensions;
 using UnityEngine;
 
+#nullable enable
+
 namespace EFT.Trainer.Features
 {
-	public class Players : FeatureMonoBehaviour
+	public class Players : ToggleMonoBehaviour
 	{
 		[ConfigurationProperty]
 		public Color BearColor { get; set; } = Color.blue;
@@ -19,15 +20,7 @@ namespace EFT.Trainer.Features
 		[ConfigurationProperty]
 		public Color BossColor { get; set; } = Color.red;
 
-		private Shader _outline;
-
-		private void Awake()
-		{
-			var bundle = AssetBundle.LoadFromFile(Path.Combine(Application.dataPath, "outline"));
-			_outline = bundle.LoadAsset<Shader>("assets/outline.shader");
-		}
-
-		protected override void UpdateFeature()
+		protected override void UpdateWhenEnabled()
 		{
 			var hostiles = GameState.Current?.Hostiles;
 			if (hostiles == null)
@@ -39,7 +32,7 @@ namespace EFT.Trainer.Features
 					continue;
 
 				var color = GetPlayerColor(ennemy);
-				SetShaders(ennemy, _outline, color);
+				SetShaders(ennemy, GameState.OutlineShader, color);
 			}
 		}
 
@@ -77,6 +70,9 @@ namespace EFT.Trainer.Features
 
 					var material = renderer.material;
 					if (material == null)
+						continue;
+
+					if (material.shader != null && material.shader == shader)
 						continue;
 
 					material.shader = shader;

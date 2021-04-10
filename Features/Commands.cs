@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,6 +14,8 @@ using JsonType;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
+#nullable enable
+
 namespace EFT.Trainer.Features
 {
 	public class Commands : MonoBehaviour
@@ -23,12 +26,18 @@ namespace EFT.Trainer.Features
 		private readonly Dictionary<string, Type> _features = new()
 		{
 			{"wallhack", typeof(Players)},
+			{"thermal", typeof(ThermalVision)},
 			{"stash", typeof(LootableContainers)},
+			{"stamina", typeof(Stamina)},
 			{"quest", typeof(Quests)},
-			{"norecoil", typeof(Recoil)},
+			{"norecoil", typeof(NoRecoil)},
+			{"night", typeof(NightVision)},
 			{"loot", typeof(LootItems)},
 			{"hud", typeof(Hud)},
+			{"grenade", typeof(Grenades)},
 			{"exfil", typeof(ExfiltrationPoints)},
+			{"crosshair", typeof(CrossHair)},
+			{"autogun", typeof(AutomaticGun)},
 		};
 
 		private void Update()
@@ -50,24 +59,28 @@ namespace EFT.Trainer.Features
 
 			foreach (var (featureName, featureType) in _features)
 			{
-				commands.AddCommand(new GClass1907($"{featureName} (?<{ValueGroup}>(on)|(off))", m => OnTriggerFeature(featureType, m)));
+				CreateCommand(commands, $"{featureName} (?<{ValueGroup}>(on)|(off))", m => OnTriggerFeature(featureType, m));
 			}
 
-			commands.AddCommand(new GClass1907("dump", _ => Dump()));
-			commands.AddCommand(new GClass1907("status", _ => Status()));
+			CreateCommand(commands, "dump", _ => Dump());
+			CreateCommand(commands, "status", _ => Status());
 
 			var feature = Loader.HookObject.GetComponent<LootItems>();
 			if (feature != null)
 			{
-				commands.AddCommand(new GClass1907($"list( (?<{ValueGroup}>.*))?", m => ListLootItems(m, feature)));
-				commands.AddCommand(new GClass1907($"track (?<{ValueGroup}>.*)", m => TrackLootItem(m, feature)));
-				commands.AddCommand(new GClass1907($"untrack (?<{ValueGroup}>.*)", m => UnTrackLootItem(m, feature)));
+				CreateCommand(commands, $"list {{0}}( (?<{ValueGroup}>.*))?", m => ListLootItems(m, feature));
+				CreateCommand(commands, $"listr {{0}}( (?<{ValueGroup}>.*))?", m => ListLootItems(m, feature, ELootRarity.Rare));
+				CreateCommand(commands, $"listsr {{0}}( (?<{ValueGroup}>.*))?", m => ListLootItems(m, feature, ELootRarity.Superrare));
+
+				CreateCommand(commands, $"track (?<{ValueGroup}>.*)", m => TrackLootItem(m, feature));
+				CreateCommand(commands, $"untrack (?<{ValueGroup}>.*)", m => UnTrackLootItem(m, feature));
+				CreateCommand(commands, "tracklist", _ => ShowTrackList(feature));
 			}
 
 			var configFile = Path.Combine(UserPath, "trainer.ini");
 			var features = Loader.HookObject.GetComponents(typeof(MonoBehaviour));
-			commands.AddCommand(new GClass1907("load", _ => ConfigurationManager.Load(configFile, features)));
-			commands.AddCommand(new GClass1907("save", _ => ConfigurationManager.Save(configFile, features)));
+			CreateCommand(commands, "load", _ => ConfigurationManager.Load(configFile, features));
+			CreateCommand(commands, "save", _ => ConfigurationManager.Save(configFile, features));
 
 			// Load default configuration
 			ConfigurationManager.Load(configFile, features, false);
@@ -76,13 +89,39 @@ namespace EFT.Trainer.Features
 			Destroy(this);
 		}
 
+		private static void CreateCommand(IList commands, string regex, Action<Match> match)
+		{
+			// 'commands' field is a List<?> where ? is an obfuscated type, distinct for every EFT build
+			// so use reflection instead of breaking the build every time
+			// and use the non generic IList interface to add a new item
+			var listType = commands.GetType();
+			var commandType = listType.GetGenericArguments().FirstOrDefault();
+			if (commandType == null)
+				return;
+
+			var command = Activator.CreateInstance(commandType, regex, match);
+			if (command == null)
+				return;
+
+			commands.Add(command);
+		}
+
+		private static void ShowTrackList(LootItems feature, bool changed = false)
+		{
+			if (changed)
+				AddConsoleLog("Tracking list updated...", "tracker");
+
+			foreach (var item in feature.TrackedNames)
+				AddConsoleLog($"Tracking: {item}", "tracker");
+		}
+
 		private static void UnTrackLootItem(Match match, LootItems feature)
 		{
 			var matchGroup = match?.Groups[ValueGroup];
 			if (matchGroup == null || !matchGroup.Success)
 				return;
 
-			feature.UnTrack(matchGroup.Value);
+			ShowTrackList(feature, feature.UnTrack(matchGroup.Value));
 		}
 
 		private static void TrackLootItem(Match match, LootItems feature)
@@ -91,10 +130,10 @@ namespace EFT.Trainer.Features
 			if (matchGroup == null || !matchGroup.Success)
 				return;
 
-			feature.Track(matchGroup.Value);
+			ShowTrackList(feature, feature.Track(matchGroup.Value));
 		}
 
-		private static void ListLootItems(Match match, LootItems feature)
+		private static void ListLootItems(Match match, LootItems feature, ELootRarity rarityFilter = ELootRarity.Not_exist)
 		{
 			var search = string.Empty;
 			var matchGroup = match?.Groups[ValueGroup];
@@ -102,7 +141,6 @@ namespace EFT.Trainer.Features
 				search = matchGroup.Value.Trim();
 
 			var world = Singleton<GameWorld>.Instance;
-
 			if (world == null)
 				return;
 
@@ -127,14 +165,17 @@ namespace EFT.Trainer.Features
 
 				var list = itemsPerName[itemName];
 				var rarity = list.First().Template.Rarity;
-				var extra = rarity != ELootRarity.Not_exist ? $" ({rarity})" : string.Empty;
-				AddConsoleLog($"{itemName} [{list.Count}]{extra}", "list");
+				if (rarityFilter != ELootRarity.Not_exist && rarityFilter != rarity)
+					continue;
+
+				var extra = rarity != ELootRarity.Not_exist ? $" ({rarity.Color()})" : string.Empty;
+				AddConsoleLog($"{itemName} [{list.Count.ToString().Cyan()}]{extra}", "list");
 
 				count += list.Count;
 			}
 
 			AddConsoleLog("------", "list");
-			AddConsoleLog($"found {count} items", "list");
+			AddConsoleLog($"found {count.ToString().Cyan()} items", "list");
 		}
 
 		private static void FindItemsInContainers(Dictionary<string, List<Item>> itemsPerName)
@@ -171,10 +212,10 @@ namespace EFT.Trainer.Features
 				filteredItems.Add(lootItem.Item);
 			}
 
-			IndexItems(filteredItems.ToArray(), itemsPerName);
+			IndexItems(filteredItems, itemsPerName);
 		}
 
-		private static void IndexItems(Item[] items, Dictionary<string, List<Item>> itemsPerName)
+		private static void IndexItems(IEnumerable<Item> items, Dictionary<string, List<Item>> itemsPerName)
 		{
 			foreach (var item in items)
 			{
@@ -196,11 +237,14 @@ namespace EFT.Trainer.Features
 		{
 			foreach (var (featureName, featureType) in _features)
 			{
-				if (Loader.HookObject.GetComponent(featureType) is not FeatureMonoBehaviour feature)
-					return;
+				if (Loader.HookObject.GetComponent(featureType) is not ToggleMonoBehaviour feature)
+				{
+					AddConsoleLog($"{featureName} is not loaded!".Red(), "status");
+					continue;
+				}
 
 				var help = feature.Key != KeyCode.None ? $" ({feature.Key} to toggle)" : string.Empty;
-				AddConsoleLog($"{featureName} is {(feature.Enabled ? "on" : "off")}{help}", "status");
+				AddConsoleLog($"{featureName} is {(feature.Enabled ? "on".Green() : "off".Red())}{help}", "status");
 			}
 		}
 
@@ -247,7 +291,7 @@ namespace EFT.Trainer.Features
 			if (matchGroup == null || !matchGroup.Success)
 				return;
 
-			if (Loader.HookObject.GetComponent(featureType) is not FeatureMonoBehaviour feature)
+			if (Loader.HookObject.GetComponent(featureType) is not ToggleMonoBehaviour feature)
 				return;
 
 			feature.Enabled = matchGroup.Value switch
@@ -263,6 +307,5 @@ namespace EFT.Trainer.Features
 			if (PreloaderUI.Instantiated)
 				PreloaderUI.Instance.Console.AddLog(log, from);
 		}
-
 	}
 }

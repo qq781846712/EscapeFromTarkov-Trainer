@@ -1,11 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Comfort.Common;
 using EFT.Interactive;
 using EFT.Trainer.Configuration;
 using EFT.Trainer.Extensions;
 using UnityEngine;
+
+#nullable enable
 
 namespace EFT.Trainer.Features
 {
@@ -18,8 +19,6 @@ namespace EFT.Trainer.Features
 		public Color NotEligibleColor { get; set; } = Color.yellow;
 
 		public override float CacheTimeInSec { get; set; } = 7f;
-
-		public static PointOfInterest[] Empty => Array.Empty<PointOfInterest>();
 
 		public override PointOfInterest[] RefreshData()
 		{
@@ -34,7 +33,7 @@ namespace EFT.Trainer.Features
 			if (!player.IsValid())
 				return Empty;
 
-			var profile = player!.Profile;
+			var profile = player.Profile;
 			var info = profile?.Info;
 			if (info == null)
 				return Empty;
@@ -44,11 +43,14 @@ namespace EFT.Trainer.Features
 			if (points == null)
 				return Empty;
 
-			var camera = Camera.main;
+			var camera = GameState.Current?.Camera;
 			if (camera == null)
 				return Empty;
 
-			var eligiblePoints = GetEligibleExfiltrationPoints(side, world, profile);
+			var eligiblePoints = GetEligibleExfiltrationPoints(side, world, profile!);
+			if (eligiblePoints == null)
+				return Empty;
+
 			var records = new List<PointOfInterest>();
 			foreach (var point in points)
 			{
@@ -68,14 +70,14 @@ namespace EFT.Trainer.Features
 			return records.ToArray();
 		}
 
-		private static ExfiltrationPoint[] GetExfiltrationPoints(EPlayerSide side, GameWorld world)
+		private static ExfiltrationPoint[]? GetExfiltrationPoints(EPlayerSide side, GameWorld world)
 		{
 			var ect = world.ExfiltrationController;
 			// ReSharper disable once CoVariantArrayConversion
 			return side == EPlayerSide.Savage ? ect.ScavExfiltrationPoints : ect.ExfiltrationPoints;
 		}
 
-		private static ExfiltrationPoint[] GetEligibleExfiltrationPoints(EPlayerSide side, GameWorld world, Profile profile)
+		private static ExfiltrationPoint[]? GetEligibleExfiltrationPoints(EPlayerSide side, GameWorld world, Profile profile)
 		{
 			var ect = world.ExfiltrationController;
 			if (side != EPlayerSide.Savage)

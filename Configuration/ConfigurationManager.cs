@@ -1,11 +1,12 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using EFT.UI;
 using Newtonsoft.Json;
 using UnityEngine;
+
+#nullable enable
 
 namespace EFT.Trainer.Configuration
 {
@@ -88,44 +89,6 @@ namespace EFT.Trainer.Configuration
 
 			File.WriteAllText(filename, content.ToString());
 			AddConsoleLog($"Saved {filename}");
-		}
-	}
-
-	public class ColorConverter : JsonConverter
-	{
-		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-		{
-			var color = (Color)value;
-			serializer.Serialize(writer, new[] {color.r, color.g, color.b, color.a});
-		}
-
-		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-		{
-			var array = serializer.Deserialize<float[]>(reader);
-			return new Color(array[0], array[1], array[2], array[3]);
-		}
-
-		public override bool CanConvert(Type objectType)
-		{
-			return objectType == typeof(Color);
-		}
-	}
-
-	public class KeyCodeConverter : JsonConverter
-	{
-		public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
-		{
-			serializer.Serialize(writer, Enum.GetName(typeof(KeyCode), value));
-		}
-
-		public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
-		{
-			return Enum.Parse(typeof(KeyCode), serializer.Deserialize<string>(reader));
-		}
-
-		public override bool CanConvert(Type objectType)
-		{
-			return objectType == typeof(KeyCode);
 		}
 	}
 }

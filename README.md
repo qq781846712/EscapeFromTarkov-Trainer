@@ -5,27 +5,36 @@
 
 This is an attempt -for educational purposes only- to alter a Unity game at runtime without patching the binaries (so without using [Cecil](https://github.com/jbevain/cecil) nor [Reflexil](https://github.com/sailro/reflexil)).
 
+`master` branch can build against `EFT 0.12.10.11661`. If you are looking for another version, see [`branches`](https://github.com/sailro/EscapeFromTarkov-Trainer/branches) and [`releases`](https://github.com/sailro/EscapeFromTarkov-Trainer/releases).
+
 ## Features
 
 This trainer gives:
 - HUD (ammo left in chamber / magazine, fire mode).
-- Door unlocker (use keypad period).
+- Door unlocker (use keypad period, or setup your own key bindings with [trainer.ini](#sample-trainerini-configuration-file)).
 - Wallhack (you'll see players / bots / bosses with distinct colors through walls).
 - Exfiltration points (green for available points, yellow for others).
 - No recoil (off by default).
 - Locations for taking/placing quest items (off by default). Only items related to your started quests are displayed.
 - Hidden stashes like buried barrels or ground caches (off by default).
 - Ability to list all lootable items and to track any item by name (even in containers).
+- Unlimited stamina (off by default).
+- Force all guns (even bolt action guns) to use automatic firing mode with customizable fire rate.
+- Thermal and night visions (even combined).
+- Crosshair (off by default) with customizable size, color, thickness and auto-hide feature when aiming.
+- Grenades outline (off by default).
 - Load/Save all settings.
 
-![Wallhack](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/demo.png)
-![Exfils](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/demo2.png)
-![Colors](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/demo3.png)
-![Quests](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/quests.png)
-![Stashes](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/stashes.png)
-![Track](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/track.png)
-![Lootitems](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/lootitems.png)
-![ItemInContainers](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/itemcontainers.png)
+![Wallhack](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/demo.jpg)
+![Exfils](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/demo2.jpg)
+![Colors](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/demo3.jpg)
+![Quests](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/quests.jpg)
+![Stashes](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/stashes.jpg)
+![Track](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/track.jpg)
+![Lootitems](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/lootitems.jpg)
+![ItemInContainers](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/itemcontainers.jpg)
+![NightVision](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/night.jpg)
+![ThermalVision](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/thermal.jpg)
 
 ## Installation
 
@@ -47,26 +56,35 @@ Overwrite the existing `EscapeFromTarkov_Data\Managed\NLog.dll.nlog` using `NLog
 
 ## Configuration
 
-![console](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/console.png)
+![console](https://github.com/sailro/EscapeFromTarkov-Trainer/raw/master/Images/console.jpg)
 
 This trainer hooks into the command system, so you can easily setup features using the built-in console:
 
-| Command  | Values              | Default | Description                      | 
-|----------|---------------------|---------|----------------------------------|
-| dump     |                     |         | Dump game state for analysis     |
-| exfil    | `on` or `off`       | `on`    | Show/hide exfiltration points    |
-| hud      | `on` or `off`       | `on`    | Show/hide hud.                   |
-| list     | `<optional filter>` |         | List lootable items              |
-| load     |                     |         | Load settings from `trainer.ini` |
-| loot     | `on` or `off`       |         | Show/hide tracked items          |
-| norecoil | `on` or `off`       | `off`   | Disable/Enable recoil            |
-| quest    | `on` or `off`       | `off`   | Show/hide quest POI              |
-| save     |                     |         | Save settings to `trainer.ini`   |
-| stash    | `on` or `off`       | `off`   | Show/hide stashes                |
-| status   |                     |         | Show status of all features      |
-| track    | `[name]`            |         | Track all items matching `name`  |
-| untrack  | `[name]` or `*`     |         | Untrack a `name` or `*` for all  |
-| wallhack | `on` or `off`       | `on`    | Show/hide players (on next raid) |
+| Command   | Values              | Default | Description                         | 
+|-----------|---------------------|---------|-------------------------------------|
+| autogun   | `on` or `off`       | `off`   | Enable/Disable automatic gun mode   |
+| crosshair | `on` or `off`       | `off`   | Show/Hide crosshair                 |
+| dump      |                     |         | Dump game state for analysis        |
+| exfil     | `on` or `off`       | `on`    | Show/Hide exfiltration points       |
+| grenade   | `on` or `off`       | `off`   | Show/Hide grenades                  |
+| hud       | `on` or `off`       | `on`    | Show/Hide hud                       |
+| list      | `<optional filter>` |         | List lootable items                 |
+| listr     | `<optional filter>` |         | List only rare lootable items       |
+| listsr    | `<optional filter>` |         | List only super rare lootable items |
+| load      |                     |         | Load settings from `trainer.ini`    |
+| loot      | `on` or `off`       |         | Show/Hide tracked items             |
+| night     | `on` or `off`       | `off`   | Enable/Disable night vision         |
+| norecoil  | `on` or `off`       | `off`   | Disable/Enable recoil               |
+| quest     | `on` or `off`       | `off`   | Show/Hide quest POI                 |
+| save      |                     |         | Save settings to `trainer.ini`      |
+| stamina   | `on` or `off`       | `off`   | Enable/Disable unlimited stamina    |
+| stash     | `on` or `off`       | `off`   | Show/Hide stashes                   |
+| status    |                     |         | Show status of all features         |
+| thermal   | `on` or `off`       | `off`   | Enable/Disable thermal vision       |
+| track     | `[name]`            |         | Track all items matching `name`     |
+| tracklist |                     |         | Show tracked items                  |
+| untrack   | `[name]` or `*`     |         | Untrack a `name` or `*` for all     |
+| wallhack  | `on` or `off`       | `on`    | Show/hide players (on next raid)    |
 
 ## Sample `trainer.ini` configuration file
 
@@ -74,6 +92,17 @@ This trainer hooks into the command system, so you can easily setup features usi
 ; Be careful when updating this file :)
 ; For keys, use https://docs.unity3d.com/ScriptReference/KeyCode.html
 ; Colors are stored as an array of 'RGBA' floats
+
+EFT.Trainer.Features.AutomaticGun.Enabled=false
+EFT.Trainer.Features.AutomaticGun.Key="None"
+EFT.Trainer.Features.AutomaticGun.Rate=500
+
+EFT.Trainer.Features.CrossHair.Color=[1.0,0.0,0.0,1.0]
+EFT.Trainer.Features.CrossHair.Enabled=true
+EFT.Trainer.Features.CrossHair.HideWhenAiming=true
+EFT.Trainer.Features.CrossHair.Key="None"
+EFT.Trainer.Features.CrossHair.Size=10.0
+EFT.Trainer.Features.CrossHair.Thickness=2.0
 
 EFT.Trainer.Features.Doors.Key="KeypadPeriod"
 
@@ -84,6 +113,11 @@ EFT.Trainer.Features.ExfiltrationPoints.Key="F1"
 EFT.Trainer.Features.ExfiltrationPoints.NotEligibleColor=[1.0,0.921568632,0.0156862754,1.0]
 
 EFT.Trainer.Features.GameState.CacheTimeInSec=2.0
+
+EFT.Trainer.Features.Grenades.CacheTimeInSec=0.25
+EFT.Trainer.Features.Grenades.Color=[1.0,0.0,0.0,1.0]
+EFT.Trainer.Features.Grenades.Enabled=true
+EFT.Trainer.Features.Grenades.Key="None"
 
 EFT.Trainer.Features.Hud.Color=[1.0,1.0,1.0,1.0]
 EFT.Trainer.Features.Hud.Enabled=true
@@ -99,7 +133,13 @@ EFT.Trainer.Features.LootItems.Color=[0.0,1.0,1.0,1.0]
 EFT.Trainer.Features.LootItems.Enabled=true
 EFT.Trainer.Features.LootItems.Key="F4"
 EFT.Trainer.Features.LootItems.SearchInsideContainers=true
-EFT.Trainer.Features.LootItems.TrackedNames=["6L31","analyzer","graphic","ushanka","cowboy","respirator","gphone","controller","fiber","wires","vpx","rfid","rechar"]
+EFT.Trainer.Features.LootItems.TrackedNames=["virtex","sg-c10","cofdm","battery","vpx","ushanka","chat","pilgrim"]
+
+EFT.Trainer.Features.NightVision.Enabled=false
+EFT.Trainer.Features.NightVision.Key="F11"
+
+EFT.Trainer.Features.NoRecoil.Enabled=false
+EFT.Trainer.Features.NoRecoil.Key="F7"
 
 EFT.Trainer.Features.Players.BearColor=[0.0,0.0,1.0,1.0]
 EFT.Trainer.Features.Players.BossColor=[1.0,0.0,0.0,1.0]
@@ -113,8 +153,11 @@ EFT.Trainer.Features.Quests.Color=[1.0,0.0,1.0,1.0]
 EFT.Trainer.Features.Quests.Enabled=true
 EFT.Trainer.Features.Quests.Key="F6"
 
-EFT.Trainer.Features.Recoil.Enabled=false
-EFT.Trainer.Features.Recoil.Key="F7"
+EFT.Trainer.Features.Stamina.Enabled=true
+EFT.Trainer.Features.Stamina.Key="None"
+
+EFT.Trainer.Features.ThermalVision.Enabled=false
+EFT.Trainer.Features.ThermalVision.Key="F12"
 ```
 
 ## Mono injection
